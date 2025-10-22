@@ -199,29 +199,18 @@
         
         .phone-container {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        @media (min-width: 380px) {
-            .phone-container {
-                flex-direction: row;
-                gap: 8px;
-            }
+            gap: 8px;
+            width: 100%;
         }
         
         .phone-prefix {
-            flex: 0 0 auto;
-        }
-        
-        @media (min-width: 380px) {
-            .phone-prefix {
-                width: 100px;
-            }
+            width: 85px; /* Reducido para solo 6 caracteres */
+            flex-shrink: 0;
         }
         
         .phone-number {
             flex: 1;
+            min-width: 0;
         }
         
         .summary {
