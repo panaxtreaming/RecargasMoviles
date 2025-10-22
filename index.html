@@ -128,40 +128,35 @@
             border-color: #dc012a;
         }
         
-        .amount-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+        .amount-select-container {
             margin-bottom: 20px;
         }
         
-        @media (max-width: 380px) {
-            .amount-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .amount-btn {
-            background-color: #f8f8f8;
-            border: 2px solid #e0e0e0;
+        .amount-select {
+            width: 100%;
+            padding: 14px 12px;
+            border: 1px solid #ddd;
             border-radius: 10px;
-            padding: 16px 12px;
-            text-align: center;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 15px;
+            font-size: 16px;
+            background-color: white;
+            transition: border-color 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
         }
         
-        .amount-btn:hover {
-            background-color: #e8f6ff;
+        .amount-select:focus {
+            outline: none;
             border-color: #00aae0;
+            box-shadow: 0 0 0 2px rgba(0, 170, 224, 0.1);
         }
         
-        .amount-btn.selected {
-            background-color: #00aae0;
-            color: white;
-            border-color: #00aae0;
+        .amount-select:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
         }
         
         .input-group {
@@ -202,20 +197,31 @@
             display: block;
         }
         
-        .phone-group {
+        .phone-container {
             display: flex;
-            gap: 8px;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        @media (min-width: 380px) {
+            .phone-container {
+                flex-direction: row;
+                gap: 8px;
+            }
         }
         
         .phone-prefix {
-            width: 90px;
-            flex-shrink: 0;
+            flex: 0 0 auto;
+        }
+        
+        @media (min-width: 380px) {
+            .phone-prefix {
+                width: 100px;
+            }
         }
         
         .phone-number {
             flex: 1;
-            min-width: 0;
         }
         
         .summary {
@@ -244,17 +250,17 @@
         
         .actions {
             display: flex;
+            flex-direction: column;
             gap: 10px;
         }
         
-        @media (max-width: 380px) {
+        @media (min-width: 380px) {
             .actions {
-                flex-direction: column;
+                flex-direction: row;
             }
         }
         
         .btn {
-            flex: 1;
             padding: 16px;
             border: none;
             border-radius: 10px;
@@ -262,6 +268,14 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        @media (min-width: 380px) {
+            .btn {
+                width: auto;
+                flex: 1;
+            }
         }
         
         .btn-primary {
@@ -454,10 +468,6 @@
             .operator-buttons {
                 flex-direction: column;
             }
-            
-            .amount-btn {
-                padding: 14px 10px;
-            }
         }
     </style>
 </head>
@@ -483,8 +493,10 @@
                 <div class="operator-info" id="operator-info">
                     Primero selecciona una operadora
                 </div>
-                <div class="amount-grid" id="amount-grid">
-                    <!-- Los montos se cargarán aquí automáticamente -->
+                <div class="amount-select-container">
+                    <select id="amount-select" class="amount-select" required disabled>
+                        <option value="">Seleccione el monto deseado</option>
+                    </select>
                 </div>
             </div>
             
@@ -498,7 +510,7 @@
                 </div>
                 <div class="input-group">
                     <label for="phone-prefix">Número de teléfono *</label>
-                    <div class="phone-group">
+                    <div class="phone-container">
                         <select id="phone-prefix" class="phone-prefix" required disabled>
                             <option value="">Código</option>
                         </select>
@@ -597,15 +609,15 @@
         // PREFIJOS POR OPERADORA
         // =============================================
         const prefijosPorOperadora = {
-            'Movistar': ['0414', '0424', '0412', '0422'],
+            'Movistar': ['0414', '0424'],
             'Movilnet': ['0416', '0426'],
-            'Digitel': ['0412', '0422', '0414', '0424']
+            'Digitel': ['0412', '0422']
         };
 
         document.addEventListener('DOMContentLoaded', function() {
             // Elementos del DOM
             const operatorButtons = document.querySelectorAll('.operator-btn');
-            const amountGrid = document.getElementById('amount-grid');
+            const amountSelect = document.getElementById('amount-select');
             const operatorInfo = document.getElementById('operator-info');
             const cedulaInput = document.getElementById('cedula');
             const cedulaError = document.getElementById('cedula-error');
@@ -706,29 +718,20 @@
                 phoneNumberInput.disabled = false;
             }
             
-            // Función para mostrar los botones de monto
+            // Función para mostrar los montos en el select
             function displayMontos(operator) {
-                const montos = montosPorOperadora[operator] || [100, 200, 300];
-                amountGrid.innerHTML = '';
+                const montos = montosPorOperadora[operator] || [];
+                amountSelect.innerHTML = '<option value="">Seleccione el monto deseado</option>';
                 
                 montos.forEach(monto => {
-                    const amountBtn = document.createElement('div');
-                    amountBtn.className = 'amount-btn';
-                    amountBtn.textContent = `${monto}.00 Bs`;
-                    amountBtn.setAttribute('data-amount', monto);
-                    
-                    amountBtn.addEventListener('click', function() {
-                        document.querySelectorAll('.amount-btn').forEach(btn => {
-                            btn.classList.remove('selected');
-                        });
-                        this.classList.add('selected');
-                        selectedAmount = parseFloat(this.getAttribute('data-amount'));
-                        updateSummary();
-                        updatePayButtonState();
-                    });
-                    
-                    amountGrid.appendChild(amountBtn);
+                    const option = document.createElement('option');
+                    option.value = monto;
+                    option.textContent = `${monto}.00 Bs`;
+                    amountSelect.appendChild(option);
                 });
+                
+                // Habilitar el select de montos
+                amountSelect.disabled = false;
             }
             
             // Función para enviar datos a Google Sheets
@@ -798,6 +801,13 @@
                     loadPrefijos(selectedOperator);
                     displayMontos(selectedOperator);
                 });
+            });
+            
+            // Event listener para el select de montos
+            amountSelect.addEventListener('change', function() {
+                selectedAmount = parseFloat(this.value) || 0;
+                updateSummary();
+                updatePayButtonState();
             });
             
             // Event listeners para validación en tiempo real
@@ -888,7 +898,8 @@
             // Event listener para el botón de cancelar
             cancelButton.addEventListener('click', function() {
                 operatorButtons.forEach(btn => btn.classList.remove('selected'));
-                amountGrid.innerHTML = '';
+                amountSelect.innerHTML = '<option value="">Seleccione el monto deseado</option>';
+                amountSelect.disabled = true;
                 phonePrefixSelect.innerHTML = '<option value="">Código</option>';
                 phonePrefixSelect.disabled = true;
                 phoneNumberInput.value = '';
@@ -905,7 +916,8 @@
             closeModalButton.addEventListener('click', function() {
                 modal.style.display = 'none';
                 operatorButtons.forEach(btn => btn.classList.remove('selected'));
-                amountGrid.innerHTML = '';
+                amountSelect.innerHTML = '<option value="">Seleccione el monto deseado</option>';
+                amountSelect.disabled = true;
                 phonePrefixSelect.innerHTML = '<option value="">Código</option>';
                 phonePrefixSelect.disabled = true;
                 phoneNumberInput.value = '';
@@ -922,7 +934,8 @@
                 if (event.target === modal) {
                     modal.style.display = 'none';
                     operatorButtons.forEach(btn => btn.classList.remove('selected'));
-                    amountGrid.innerHTML = '';
+                    amountSelect.innerHTML = '<option value="">Seleccione el monto deseado</option>';
+                    amountSelect.disabled = true;
                     phonePrefixSelect.innerHTML = '<option value="">Código</option>';
                     phonePrefixSelect.disabled = true;
                     phoneNumberInput.value = '';
