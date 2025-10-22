@@ -197,21 +197,22 @@
             display: block;
         }
         
-        .phone-container {
+        .phone-group {
             display: flex;
             gap: 8px;
-            width: 100%;
+            align-items: center;
         }
         
         .phone-prefix {
-            width: 85px; /* Reducido para solo 6 caracteres */
+            width: 90px;
             flex-shrink: 0;
         }
         
         .phone-number {
             flex: 1;
-            min-width: 0;
+            min-width: 0; /* Permite que se ajuste correctamente */
         }
+
         
         .summary {
             background-color: #f9f9f9;
@@ -941,3 +942,4 @@
     </script>
 </body>
 </html>
+
