@@ -236,7 +236,7 @@
         
         .phone-number {
             flex: 1;
-            min-width: 0; /* Permite que se ajuste correctamente */
+            min-width: 0;
         }
 
         
@@ -467,7 +467,6 @@
             margin-top: 5px;
         }
         
-        /* Mejoras de responsive para pantallas muy pequeñas */
         @media (max-width: 350px) {
             .content {
                 padding: 15px;
@@ -608,23 +607,14 @@
     </div>
 
     <script>
-        // =============================================
-        // CONFIGURACIÓN - URL DE GOOGLE APPS SCRIPT
-        // =============================================
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyj5DeZCgkHeI9dbpe518qTLoRhErPDDKamZjZvC8S8z0xZ9BegFk_JpSVrL0jJ4sUOw/exec';
         
-        // =============================================
-        // MONTOS PRE-DEFINIDOS
-        // =============================================
         const montosPorOperadora = {
             'Movistar': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200],
-            'Movilnet': [180, 360, 540, 720, 900, 1080, 1260, 1440, 1620, 1800, 1980, 2160],
-            'Digitel': [160, 320, 480, 640, 800, 960, 1120, 1280, 1440, 1600, 1760,1920]
+            'Movilnet': [180, 360, 540, 720, 900, 1080, 1260, 1440, 1620, 1800, 1980, 2160, 2340, 2520, 2700],
+            'Digitel': [160, 320, 480, 640, 800, 960, 1120, 1280, 1440, 1600, 1760, 1920]
         };
 
-        // =============================================
-        // PREFIJOS POR OPERADORA
-        // =============================================
         const prefijosPorOperadora = {
             'Movistar': ['0414', '0424'],
             'Movilnet': ['0416', '0426'],
@@ -632,7 +622,6 @@
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Elementos del DOM
             const operatorButtons = document.querySelectorAll('.operator-btn');
             const amountSelect = document.getElementById('amount-select');
             const operatorInfo = document.getElementById('operator-info');
@@ -659,31 +648,25 @@
             const loading = document.getElementById('loading');
             const closeWindowBtn = document.getElementById('close-window');
             
-            // Variables de estado
             let selectedOperator = '';
             let selectedAmount = 0;
             let isCedulaValid = false;
             let isPhoneValid = false;
 
-            // Cargar cédula del almacenamiento local al iniciar
             const savedCedula = localStorage.getItem('cedulaRecargas');
             if (savedCedula) {
                 cedulaInput.value = savedCedula;
                 validateCedula();
             }
             
-            // Función para redirigir o cerrar la ventana
             function redirectOrClose() {
-                // Intentar cerrar la ventana si fue abierta con window.open
                 if (window.opener) {
                     window.close();
                 } else {
-                    // Redireccionar a la URL especificada
                     window.location.href = 'https://www.vendeygana.net/user/';
                 }
             }
             
-            // Función para validar cédula
             function validateCedula() {
                 const cedula = cedulaInput.value.trim();
                 const cedulaRegex = /^([VEJ])?(\d{5,8})$/i;
@@ -702,7 +685,6 @@
                 }
             }
             
-            // Función para validar número de teléfono
             function validatePhone() {
                 const prefix = phonePrefixSelect.value;
                 const number = phoneNumberInput.value.trim();
@@ -721,7 +703,6 @@
                 }
             }
             
-            // Función para actualizar estado del botón de pago
             function updatePayButtonState() {
                 if (selectedOperator && selectedAmount > 0 && isCedulaValid && isPhoneValid) {
                     payButton.disabled = false;
@@ -730,7 +711,6 @@
                 }
             }
             
-            // Función para cargar prefijos según operadora
             function loadPrefijos(operator) {
                 const prefijos = prefijosPorOperadora[operator] || [];
                 phonePrefixSelect.innerHTML = '<option value="">Código</option>';
@@ -742,12 +722,10 @@
                     phonePrefixSelect.appendChild(option);
                 });
                 
-                // Habilitar los campos de teléfono
                 phonePrefixSelect.disabled = false;
                 phoneNumberInput.disabled = false;
             }
             
-            // Función para mostrar los montos en el select
             function displayMontos(operator) {
                 const montos = montosPorOperadora[operator] || [];
                 amountSelect.innerHTML = '<option value="">Seleccione el monto deseado</option>';
@@ -759,11 +737,9 @@
                     amountSelect.appendChild(option);
                 });
                 
-                // Habilitar el select de montos
                 amountSelect.disabled = false;
             }
             
-            // Función para enviar datos a Google Sheets
             async function saveToGoogleSheets(data) {
                 try {
                     const url = GOOGLE_SCRIPT_URL + '?timestamp=' + Date.now();
@@ -777,7 +753,6 @@
                         body: JSON.stringify(data)
                     });
                     
-                    // Con 'no-cors', no podemos leer la respuesta, pero sabemos que se envió
                     return {
                         status: 'success',
                         message: 'Datos guardados correctamente'
@@ -789,12 +764,10 @@
                 }
             }
             
-            // Función para generar un número de operación aleatorio de 8 dígitos
             function generateOperationNumber() {
                 return Math.floor(10000000 + Math.random() * 90000000);
             }
             
-            // Función para obtener la fecha y hora actual
             function getCurrentDateTime() {
                 const now = new Date();
                 const date = now.toLocaleDateString('es-ES');
@@ -802,9 +775,7 @@
                 return { date, time };
             }
             
-            // Función para actualizar el resumen (SIN COMISIÓN)
             function updateSummary() {
-                // El total es igual al monto de recarga (sin comisión)
                 const total = selectedAmount;
                 
                 summaryOperator.textContent = selectedOperator;
@@ -812,7 +783,6 @@
                 totalAmount.textContent = total.toFixed(2) + ' Bs';
             }
             
-            // Event listeners para los botones de operadora
             operatorButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     operatorButtons.forEach(btn => btn.classList.remove('selected'));
@@ -826,20 +796,17 @@
                     updateSummary();
                     updatePayButtonState();
                     
-                    // Cargar prefijos y montos para esta operadora
                     loadPrefijos(selectedOperator);
                     displayMontos(selectedOperator);
                 });
             });
             
-            // Event listener para el select de montos
             amountSelect.addEventListener('change', function() {
                 selectedAmount = parseFloat(this.value) || 0;
                 updateSummary();
                 updatePayButtonState();
             });
             
-            // Event listeners para validación en tiempo real
             cedulaInput.addEventListener('input', function() {
                 this.value = this.value.toUpperCase();
                 validateCedula();
@@ -850,12 +817,10 @@
             });
             
             phoneNumberInput.addEventListener('input', function() {
-                // Solo permitir números
                 this.value = this.value.replace(/\D/g, '');
                 validatePhone();
             });
             
-            // Event listener para el botón de pagar
             payButton.addEventListener('click', async function() {
                 if (!selectedOperator) {
                     alert('Por favor, selecciona una operadora.');
@@ -884,7 +849,6 @@
                     const operationNum = generateOperationNumber();
                     const { date, time } = getCurrentDateTime();
                     
-                    // Combinar prefijo y número en un solo campo
                     const numeroCompleto = phonePrefixSelect.value + phoneNumberInput.value;
                     
                     const formData = {
@@ -924,17 +888,14 @@
                 }
             });
             
-            // Event listener para el botón de cancelar
             cancelButton.addEventListener('click', function() {
                 redirectOrClose();
             });
             
-            // Event listener para el botón de cerrar en la parte superior
             closeWindowBtn.addEventListener('click', function() {
                 redirectOrClose();
             });
             
-            // Event listener para cerrar el modal
             closeModalButton.addEventListener('click', function() {
                 modal.style.display = 'none';
                 operatorButtons.forEach(btn => btn.classList.remove('selected'));
@@ -974,7 +935,6 @@
     </script>
 </body>
 </html>
-
 
 
 
